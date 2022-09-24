@@ -8,8 +8,10 @@
 #ifndef INC_VECTORNAV_HPP_
 #define INC_VECTORNAV_HPP_
 
-#include "main.h"
+#include <main.hpp>
 #include <stdint.h>
+#include <stdbool.h>
+#include <math.h>
 
 // Header strings that are sent to the VN300 to request data from it
 
@@ -83,6 +85,7 @@ class VN300: public Position{
 
     private:
 
+        //I think this calls the constructor and makes our single instance
         VN300();
 
         /**
@@ -101,12 +104,7 @@ class VN300: public Position{
 
         float binary_to_float(uint64_t val);
 
-        /**
-         * @brief Gets the IMU data from the VN300
-         * 
-         * @param imuData The struct holding the IMU data
-         */
-        void getIMUData(IMUData_t& imuData);
+        double binary_to_double(uint64_t val);
         
         /**
          * @brief Sends an ASCII command through UART

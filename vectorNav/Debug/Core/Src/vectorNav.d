@@ -1,6 +1,5 @@
-Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.o: \
- ../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c \
- ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
+Core/Src/vectorNav.o: ../Core/Src/vectorNav.cpp ../Core/Inc/vectorNav.hpp \
+ ../Core/Inc/main.hpp ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
@@ -31,7 +30,12 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.o: \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
- ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
+ ../Core/Inc/vectorNav.hpp
+
+../Core/Inc/vectorNav.hpp:
+
+../Core/Inc/main.hpp:
 
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 
@@ -96,3 +100,5 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.o: \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
+
+../Core/Inc/vectorNav.hpp:

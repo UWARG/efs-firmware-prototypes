@@ -7,6 +7,7 @@
 
 #include "vectorNav.hpp"
 
+
 extern UART_HandleTypeDef huart3;
 
 const char MSG_CONFIG_COMMAND[] = "$VNWRG,75,0,0,01,1C9*XX"; //ASCII command to configure custom binary data group 1
@@ -24,11 +25,14 @@ Position& VN300::getInstance(){
 void VN300::GetResult(PositionData_t& data){
     //set all values in the struct to 0?
     
+    sendCommand(POLL_DATA_COMMAND, sizeof(POLL_DATA_COMMAND));
+    recieveResponse();
+
     if (data.req_data.gps)
-        getGPSData(data.gps_data);
+        parse_gps_data(data.gps_data);
     
     if (data.req_data.imu)
-        getIMUData(data.imu_data);
+        parse_imu_data(data.imu_data);
 }
 
 /* Private methods  ---------------------------------------------------------*/
@@ -42,11 +46,6 @@ void VN300::VN300Init(void){
     sendCommand(MSG_CONFIG_COMMAND, sizeof(MSG_CONFIG_COMMAND));
 }
 
-void VN300::getGPSData(GPSData_t& gpsData){
-    sendCommand(POLL_DATA_COMMAND, sizeof(POLL_DATA_COMMAND));
-    recieveResponse();
-    parse_gps_data(gpsData);
-}
 
 void VN300::parse_gps_data(GPSData_t& gpsData){
     //Define offsets
@@ -65,15 +64,15 @@ void VN300::parse_gps_data(GPSData_t& gpsData){
 
     for (uint8_t i = 7; i >= 0; i--)
         temp <<= payload_data[LATITUDE_OFFSET + i];
-    gpsData.latitude = binary_to_float(temp);
+    gpsData.latitude = binary_to_double(temp);
 
     for (uint8_t i = 7; i >= 0; i--)
         temp <<= payload_data[LONGITUDE_OFFSET + i];
-    gpsData.longitude = binary_to_float(temp);
+    gpsData.longitude = binary_to_double(temp);
 
     for (uint8_t i = 7; i >= 0; i--)
         temp <<= payload_data[ALTITUDE_OFFSET + i];
-    gpsData.altitude = binary_to_float(temp);
+    gpsData.altitude = binary_to_double(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
         temp <<= payload_data[VELNORTH_OFFSET + i];
@@ -90,11 +89,21 @@ void VN300::parse_gps_data(GPSData_t& gpsData){
 }
 
 float VN300::binary_to_float(uint64_t val){
+    //explain how this works 
+    uint8_t exponent = ((val >> 23) & 0xFF) - 128;
+    uint32_t mantissa = val & 0x7FFFFF;
+    float final_val = (1 + ((float)mantissa / pow(2, 23))) * (2.0*pow(2,exponent));
+
+    return ((val >> 31 == 1) ? (final_val * -1) : final_val);
 
 }
 
-void VN300::getIMUData(IMUData_t& imuData){
+double VN300::binary_to_double(uint64_t val){
+    uint8_t exponent = ((val >> 52) & 0xFF7) - 2048;
+    uint32_t mantissa = val & 0x7FFFFFFFFFFFF;
+    float final_val = (1 + ((float)mantissa / pow(2, 52))) * (2.0*pow(2,exponent));
 
+    return ((val >> 63 == 1) ? (final_val * -1) : final_val);
 }
 
 void VN300::parse_imu_data(IMUData_t& imuData){
@@ -131,8 +140,6 @@ void VN300::parse_imu_data(IMUData_t& imuData){
         temp <<= payload_data[ACCEL2_OFFSET + i];
     imuData.accel2 = binary_to_float(temp);
 }
-
-
 
 void VN300::sendCommand(const char* command, uint16_t size){
     HAL_UART_Transmit(&huart3, (uint8_t*)command, size, 100);
