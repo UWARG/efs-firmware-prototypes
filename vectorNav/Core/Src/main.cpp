@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <main.hpp>
 #include "string.h"
+#include <vectorNav.hpp>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

@@ -15,9 +15,6 @@
 
 // Header strings that are sent to the VN300 to request data from it
 
-const char* GPS_HEADER = "$VNGPS";
-const char* IMU_HEADER = "$VNIMU";
-
 typedef struct{
     uint64_t time;        // Time since startup in nanoseconds
     double latitude;      // Latitude in degrees

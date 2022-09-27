@@ -5,8 +5,10 @@
  *      Author: Christopher Chung
  */
 
-#include "vectorNav.hpp"
+#include <vectorNav.hpp>
 
+const char* GPS_HEADER = "$VNGPS";
+const char* IMU_HEADER = "$VNIMU";
 
 extern UART_HandleTypeDef huart3;
 
