@@ -12,10 +12,14 @@ const char* IMU_HEADER = "$VNIMU";
 
 extern UART_HandleTypeDef huart3;
 
+const char ANT_A_OFFSET_COMMAND[] = "$VNWRG,57,0.1,0,0*XX";                     //ASCII command to set the Antenna A Offset {0.1,0,0}
+const char ANT_B_OFFSET_COMMAND[] = "$VNWRG,93,1.5,0,0,0.038,0.038,0.038*XX";   //ACSII command to set the Antenna A Offset {0.2,0,0} and uncertainly {0.0254, 0.0254, 0.0254} 
+
 const char MSG_CONFIG_COMMAND[] = "$VNWRG,75,0,0,01,1C9*XX"; //ASCII command to configure custom binary data group 1
 const char POLL_DATA_COMMAND[] = "$VNBOM,1*XX";              //ASCII command to poll VN300 and request custom binary data group 1
-const uint16_t PAYLOAD_SIZE = 74;                             //Size of custom message payload coming from VN300
-uint8_t payload_data[PAYLOAD_SIZE] = {0};                         //RX buffer to hold incoming data
+
+const uint16_t PAYLOAD_SIZE = 74;                            //Size of custom message payload coming from VN300
+uint8_t payload_data[PAYLOAD_SIZE] = {0};                    //RX buffer to hold incoming data
 
 /* Public Methods  ---------------------------------------------------------*/
 
@@ -42,8 +46,21 @@ VN300::VN300(){
     VN300Init();
 }
 
-void VN300::VN300Init(void){
-    //send satellite orientation commands
+void VN300::VN300Init(void){    
+    //GNSS Antenna A Offset
+    sendCommand(ANT_A_OFFSET_COMMAND, sizeof(ANT_A_OFFSET_COMMAND));
+    
+    //GNSS Antenna B Offset
+    sendCommand(ANT_B_OFFSET_COMMAND, sizeof(ANT_B_OFFSET_COMMAND));
+
+    /*
+        "To ensure that the output is consistent with the attitude of the vehicle the sensor is attached to you will 
+        need to align the sensor on the vehicle such that the X-axis points out the front of the vehicle (bow), the 
+        Y-axis points out the right (starboard), and the Z axis points down."
+
+        If the above is not true, you must set the Reference Frame Rotation Register
+    */
+
     //set configuration register with custom binary output
     sendCommand(MSG_CONFIG_COMMAND, sizeof(MSG_CONFIG_COMMAND));
 }
