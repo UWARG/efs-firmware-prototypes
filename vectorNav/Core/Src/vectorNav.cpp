@@ -7,6 +7,8 @@
 
 #include <vectorNav.hpp>
 
+const uint8_t BITS_PER_BYTE = 8;
+
 const char* GPS_HEADER = "$VNGPS";
 const char* IMU_HEADER = "$VNIMU";
 
@@ -79,30 +81,30 @@ void VN300::parse_gps_data(GPSData_t& gpsData){
     uint64_t temp = 0;
 
     for (uint8_t i = 7; i >= 0; i--)
-        gpsData.time <<= payload_data[TIME_OFFSET + i];
+        gpsData.time |= (payload_data[TIME_OFFSET + i] << (BITS_PER_BYTE * i));
 
     for (uint8_t i = 7; i >= 0; i--)
-        temp <<= payload_data[LATITUDE_OFFSET + i];
+        temp |= (payload_data[LATITUDE_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.latitude = binary_to_double(temp);
 
     for (uint8_t i = 7; i >= 0; i--)
-        temp <<= payload_data[LONGITUDE_OFFSET + i];
+        temp |= (payload_data[LONGITUDE_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.longitude = binary_to_double(temp);
 
     for (uint8_t i = 7; i >= 0; i--)
-        temp <<= payload_data[ALTITUDE_OFFSET + i];
+        temp |= (payload_data[ALTITUDE_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.altitude = binary_to_double(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[VELNORTH_OFFSET + i];
+        temp |= (payload_data[VELNORTH_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.velNorth = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[VELEAST_OFFSET + i];
+        temp |= (payload_data[VELEAST_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.velEast = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[VELDOWN_OFFSET + i];
+        temp |= (payload_data[VELDOWN_OFFSET + i] << (BITS_PER_BYTE * i));
     gpsData.velDown = binary_to_float(temp);
     
 }
@@ -136,27 +138,27 @@ void VN300::parse_imu_data(IMUData_t& imuData){
     uint64_t temp = 0;
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[PITCH_OFFSET + i];
+        temp |= (payload_data[PITCH_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.pitch = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[ROLL_OFFSET + i];
+        temp |= (payload_data[ROLL_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.roll = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[YAW_OFFSET + i];
+        temp |= (payload_data[YAW_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.yaw = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[ACCEL0_OFFSET + i];
+        temp |= (payload_data[ACCEL0_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.accel0 = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[ACCEL1_OFFSET + i];
+        temp |= (payload_data[ACCEL1_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.accel1 = binary_to_float(temp);
 
     for (uint8_t i = 3; i >= 0; i--)
-        temp <<= payload_data[ACCEL2_OFFSET + i];
+        temp |= (payload_data[ACCEL2_OFFSET + i] << (BITS_PER_BYTE * i));
     imuData.accel2 = binary_to_float(temp);
 }
 
