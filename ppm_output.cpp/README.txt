@@ -27,6 +27,7 @@ General Notes
  - Issue where the code takes too long on the HAL_delay call, and a pulse value is sent twice before sending the next value. This issue occurs when our first pulse is less than the 
    second pulse, our period is 10ms ( or close to it), and the coming pulse is close to 10ms. I have not been able to replicate this issue recently, and I am 
    not sure that said conditions cause it, but I am sure it still exists. 
+ - Due to the fact that our period is a 32 bit value, our system will round values that cannot be acheived . Ultimately, we lose points of precision, but this is inevitable.  
  
  Cases
  -  Pulse difference defaults to false when the difference in coming pulses is 0. In doing so, we see a negligible (0.05 millisecond) change in our pulse value.  
