@@ -86,6 +86,31 @@ static void MX_TIM17_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void toggle_all_GPIO(void)
+{
+
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
+
+	  /*Configure GPIO pin Output Level */
+	HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_15);
+
+	  /*Configure GPIO pin Output Level */
+	HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+	                          |GPIO_PIN_4|GPIO_PIN_5);
+
+	  /*Configure GPIO pin Output Level */
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6
+	                          |GPIO_PIN_7);
+}
+
+
+
+
+
+
+
+
+
 
 /* USER CODE END 0 */
 
@@ -141,7 +166,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  toggle_all_GPIO();
+	  HAL_Delay(500);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
