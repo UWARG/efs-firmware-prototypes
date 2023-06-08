@@ -24,6 +24,7 @@
 #include "ucpd.h"
 #include "usb.h"
 #include "gpio.h"
+#include "dma.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -91,21 +92,34 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC1_Init();
+  MX_DMA_Init();
   MX_LPUART1_UART_Init();
   MX_RTC_Init();
   MX_UCPD1_Init();
   MX_USB_PCD_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   const uint16_t buf_size = UARTDevice::BUFFER_SIZE;
   uint8_t buf[buf_size];
   uint16_t data_size = 0;
 
+  uint8_t test_iterations = 1;
+  const uint8_t max_test_iterations = 20;
+
   const char* start_msg = "Test Start\r\n";
   const char* msg = "Hello from the other side.\r\n";
-  HAL_UART_Transmit(&hlpuart1, (uint8_t*)start_msg, strlen(start_msg)-1, 1000);
-  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg)-1, 1000);
+  const char* end_msg = "Test End\r\n";
+
+  // Start test
+  HAL_UART_Transmit(&hlpuart1, (uint8_t*)start_msg, strlen(start_msg), 1000);
+
+  p_uart_dev->init();
+  HAL_Delay(1000);
+
+  // Transmit message
+  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,9 +128,20 @@ int main(void)
   {
 	  data_size = p_uart_dev->getCurDataSize();
 	  if (data_size > 0) {
+		  // Receive message from DMA interrupt
 		  memset(buf, 0, buf_size);
 		  p_uart_dev->read(buf, data_size);
 		  HAL_UART_Transmit(&hlpuart1, buf, data_size, 1000);
+		  // Go through more iterations of the test
+		  if (test_iterations < max_test_iterations) {
+			  HAL_Delay(100);
+			  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+			  ++test_iterations;
+			  if (test_iterations == max_test_iterations) {
+				  // End of test
+				  HAL_UART_Transmit(&huart3, (uint8_t*)end_msg, strlen(end_msg), 1000);
+			  }
+		  }
 	  }
     /* USER CODE END WHILE */
 

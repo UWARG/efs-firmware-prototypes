@@ -5,9 +5,9 @@ UARTDevice::UARTDevice(UART_HandleTypeDef* huart)
     :
     uart_handle(huart), circular_buf(buf, BUFFER_SIZE) {}
 
-void UARTDevice::startInterrupt() {
-    HAL_UARTEx_ReceiveToIdle_DMA(uart_handle, buf, BUFFER_SIZE);
-	__HAL_DMA_DISABLE_IT(uart_handle->hdmarx, DMA_IT_HT);
+void UARTDevice::init() {
+    HAL_UARTEx_ReceiveToIdle_DMA(uart_handle, it_recv_buf, BUFFER_SIZE);
+    __HAL_DMA_DISABLE_IT(uart_handle->hdmarx, DMA_IT_HT);
 }
 
 void UARTDevice::callback(uint16_t data_size) {

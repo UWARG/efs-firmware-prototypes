@@ -11,7 +11,7 @@ class UARTDevice {
 
         UARTDevice(UART_HandleTypeDef* huart);
 
-        void startInterrupt();
+        void init();
         void callback(uint16_t size);
         bool matchUART(UART_HandleTypeDef* huart);
 
