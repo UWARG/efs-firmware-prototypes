@@ -1,6 +1,11 @@
 #include "CircularBuffer.hpp"
 #include <cstring>
 
+CircularBuffer::CircularBuffer(uint8_t* buf, uint16_t size) {
+    this->buf = buf;
+    this->size = size;
+}
+
 uint8_t CircularBuffer::peek(uint8_t& res, uint16_t dist) {
     if(dist + readPtr >= writePtr){
         return 0;
@@ -30,17 +35,6 @@ uint8_t CircularBuffer::read(uint8_t* res, uint16_t dist) {
 
 }
 
-
-CircularBuffer::CircularBuffer(uint8_t* buf, uint16_t size) {
-    this->buf = buf;
-    this->size = size;
-}
-
-CircularBuffer::CircularBuffer() {
-    this->buf = NULL;
-    this->size = 0;
-}
-
 bool CircularBuffer::hasSpace() {
     return !((writePtr % size == readPtr % size) && writePtr != readPtr);
 }
@@ -49,8 +43,8 @@ uint16_t CircularBuffer::getDataSize() {
     return writePtr - readPtr;
 }
 
-uint8_t CircularBuffer::write(uint8_t data) {
-    buf[writePtr % size] = data;
+uint8_t CircularBuffer::write(uint8_t byte) {
+    buf[writePtr % size] = byte;
     this->writePtr++;
     return 1;
 }

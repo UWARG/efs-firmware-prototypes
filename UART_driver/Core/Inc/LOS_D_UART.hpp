@@ -9,14 +9,25 @@ class UARTDevice {
     public:
         static const size_t BUFFER_SIZE = 280;
 
+        // Constructor. Assigns a uart handle to the driver.
         UARTDevice(UART_HandleTypeDef* huart);
 
+        // Initialization: enable DMA interrupt.
         void init();
+
+        // Callback to write DMA data to internal circular buffer.
         void callback(uint16_t size);
+
+        // Check if interrupt uart handle matches with the driver's uart handle.
         bool matchUART(UART_HandleTypeDef* huart);
 
+        // Transmit data via DMA.
         void transmit(uint8_t* buf, uint16_t size);
+
+        // Get the size of the current available data in the internal circular buffer.
         uint16_t getCurDataSize();
+
+        // Read data from the internal circular buffer.
         bool read(uint8_t* buf, uint16_t size);
 
     private:
