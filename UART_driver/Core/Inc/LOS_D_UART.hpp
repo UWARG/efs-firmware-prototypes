@@ -7,27 +7,71 @@
 
 class UARTDevice {
     public:
-        static const size_t BUFFER_SIZE = 280;
+        /* Size of the internal buffer */
+        static const uint16_t BUFFER_SIZE = 280;
 
-        // Constructor. Assigns a uart handle to the driver.
+        /** @brief Constructor for the UARTDevice driver.
+        *
+        *  The driver will manage the transmission and reception of
+        *  data via a specified HAL UART handle.
+        *
+        *  @param huart The HAL UART handle to be managed.
+        */
         UARTDevice(UART_HandleTypeDef* huart);
 
-        // Initialization: enable DMA interrupt.
+        /** @brief Initialize the driver.
+        *
+        *  Start the DMA interrupt of the UART.
+        *
+        *  @return Void.
+        */
         void init();
 
-        // Callback to write DMA data to internal circular buffer.
+        /** @brief DMA interrupt callback function.
+        *
+        *  This is called inside a DMA ISR to write DMA data to
+        *  the driver's internal buffer.
+        *
+        *  @param size Size of the DMA data available.
+        *  @return Void.
+        */
         void callback(uint16_t size);
 
-        // Check if interrupt uart handle matches with the driver's uart handle.
+        /** @brief Compares a UART handle with the driver's handle
+        *
+        *  This is called inside a DMA ISR to see if the ISR's UART
+        *  handle is the same as the one managed by the driver.
+        *
+        *  @param huart The UART handle to be compared.
+        *  @return True if the handles are the same.
+        */
         bool matchUART(UART_HandleTypeDef* huart);
 
-        // Transmit data via DMA.
+        /** @brief Transmit data via UART
+        *
+        *  @param buf The buffer that contains data to be transmitted
+        *  @param size Size of the data to be transmitted
+        *  @return Void.
+        */
         void transmit(uint8_t* buf, uint16_t size);
 
-        // Get the size of the current available data in the internal circular buffer.
-        uint16_t getCurDataSize();
+        /** @brief Get the size of the available data received from the
+        *          UART and stored in the internal buffer.
+        *
+        *  @return Size of available data to be read in bytes.
+        */
+        uint16_t getAvailDataSize();
 
-        // Read data from the internal circular buffer.
+        /** @brief Read data received from UART
+        *
+        *  Read data that has been received from the UART and stored in
+        *  the driver's internal buffer.
+        *
+        *  @param buf Buffer to read the data into.
+        *  @param size Size of the data to be read
+        *  @return True if read succeeded. False if we're trying to read
+        *          more than the data available.
+        */
         bool read(uint8_t* buf, uint16_t size);
 
     private:

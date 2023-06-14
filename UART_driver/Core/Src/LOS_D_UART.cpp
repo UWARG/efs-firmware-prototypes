@@ -14,25 +14,27 @@ void UARTDevice::callback(uint16_t data_size) {
     HAL_UARTEx_ReceiveToIdle_DMA(uart_handle, it_recv_buf, BUFFER_SIZE);
     __HAL_DMA_DISABLE_IT(uart_handle->hdmarx, DMA_IT_HT);
 
-    for (int i = 0; i < data_size; ++i) {
+    for (uint16_t i = 0; i < data_size; ++i) {
         circular_buf.write(it_recv_buf[i]);
     }
 }
 
 bool UARTDevice::matchUART(UART_HandleTypeDef* huart) {
+    bool match = false;
+
     if(uart_handle != NULL && huart != NULL) {
-        return uart_handle == huart;
+        match = (uart_handle == huart);
     }
 
-    return false;
+    return match;
 }
 
 void UARTDevice::transmit(uint8_t* buf, uint16_t size) {
     HAL_UART_Transmit_DMA(uart_handle, buf, size);
 }
 
-uint16_t UARTDevice::getCurDataSize() {
-    return circular_buf.getDataSize();
+uint16_t UARTDevice::getAvailDataSize() {
+    return circular_buf.getNumAvailBytes();
 }
 
 bool UARTDevice::read(uint8_t* buf, uint16_t size) {

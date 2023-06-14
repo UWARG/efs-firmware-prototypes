@@ -126,7 +126,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  data_size = p_uart_dev->getCurDataSize();
+	  data_size = p_uart_dev->getAvailDataSize();
 	  if (data_size > 0) {
 		  // Receive message from DMA interrupt
 		  memset(buf, 0, buf_size);
