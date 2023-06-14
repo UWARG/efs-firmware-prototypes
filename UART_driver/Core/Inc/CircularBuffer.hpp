@@ -5,23 +5,55 @@
 
 class CircularBuffer {
     public:
-        // Constructor. `buf` is the buffer to be used as a circular buffer
+        /** @brief Constructor for the CircularBuffer class
+        *
+        *  CircularBuffer will manage a stack-allocated byte array as a
+        *  circular buffer.
+        *
+        *  @param buf The byte array to be managed.
+        *  @param size Size of the byte array. This will be the size of
+        *              the circular buffer.
+        */
         CircularBuffer(uint8_t* buf, uint16_t size);
 
-        // Peek at a byte in the buffer
-        uint8_t peek(uint8_t& res, uint16_t dist);
+        /** @brief Read the value of a byte in the circular buffer
+        *          without incrementing the read pointer
+        *
+        *  @param res The byte value to be returned. Passed by reference.
+        *  @param index The index of the byte.
+        *  @return False if the index is out of bounds.
+        */
+        bool peek(uint8_t& res, uint16_t index);
 
-        // Read bytes from the buffer
-        uint8_t read(uint8_t* buf, uint16_t dist);
+        /** @brief Read bytes from the circular buffer and increment the
+        *          read pointer.
+        *
+        *  @param buf The buffer to read the bytes into.
+        *  @param dist Number of bytes to be read.
+        *  @return False if the number of bytes to be read exceed
+        *          the number of available bytes.
+        */
+        bool read(uint8_t* buf, uint16_t dist);
 
-        // Write byte to the buffer
-        uint8_t write(uint8_t byte);
+        /** @brief Write a byte into the circular buffer and increment
+        *          the write pointer.
+        *
+        *  @param byte The byte to write.
+        *  @return False if the circular buffer is already full.
+        */
+        bool write(uint8_t byte);
 
-        // Returns true if the buffer has space
-        bool hasSpace();
+        /** @brief Check if the circular buffer is full.
+        *
+        *  @return True if the circular buffer is full.
+        */
+        bool isFull();
 
-        // Returns the size of the current data available
-        uint16_t getDataSize();
+        /** @brief Check the number of bytes available to be read.
+        *
+        *  @return The number of bytes available to be read.
+        */
+        uint16_t getNumAvailBytes();
 
     private:
         uint8_t* buf;

@@ -6,45 +6,65 @@ CircularBuffer::CircularBuffer(uint8_t* buf, uint16_t size) {
     this->size = size;
 }
 
-uint8_t CircularBuffer::peek(uint8_t& res, uint16_t dist) {
-    if(dist + readPtr >= writePtr){
-        return 0;
-    }
-    res = buf[(readPtr + dist) % size];
-    return 1;
-}
+bool CircularBuffer::peek(uint8_t& byte, uint16_t index) {
+    bool success = true;
 
-uint8_t CircularBuffer::read(uint8_t* res, uint16_t dist) {
-    if(dist + readPtr > writePtr) return 0;
-
-    if( (readPtr % size) + dist >= size ) {
-        // two memcpys needed
-        int dist_to_end = size - (readPtr % size);
-        std::memcpy(res, &buf[readPtr % size], dist_to_end);
-        readPtr += dist_to_end;
-        dist -= dist_to_end;
-        std::memcpy(&res[dist_to_end], &buf[readPtr % size], dist);
-        readPtr += dist;
+    if (readPtr + index >= writePtr) {
+        success = false;
     } else {
-        // one memcpy needed
-        std::memcpy(res, &buf[readPtr % size], dist);
-        readPtr += dist;
+        byte = buf[(readPtr + index) % size];
     }
 
-    return 1;
-
+    return success;
 }
 
-bool CircularBuffer::hasSpace() {
-    return !((writePtr % size == readPtr % size) && writePtr != readPtr);
+bool CircularBuffer::read(uint8_t* res, uint16_t dist) {
+    bool success = true;
+
+    if (dist + readPtr > writePtr) {
+        success = false;
+    } else {
+        if ((readPtr % size) + dist >= size) {
+            // Two memcpys needed because we need to loop back to the
+            // beginning of the buffer.
+            uint16_t dist_to_end = size - (readPtr % size);
+            std::memcpy(res, &buf[readPtr % size], dist_to_end);
+            readPtr += dist_to_end;
+            dist -= dist_to_end;
+
+            std::memcpy(&res[dist_to_end], &buf[readPtr % size], dist);
+            readPtr += dist;
+        } else {
+            // One memcpy needed.
+            std::memcpy(res, &buf[readPtr % size], dist);
+            readPtr += dist;
+        }
+    }
+
+    return success;
 }
 
-uint16_t CircularBuffer::getDataSize() {
+bool CircularBuffer::isFull() {
+    // The buffer is full when the writePtr wraps around to the
+    // readPtr, so it's ahead of the readPtr by value, but overlaps
+    // the readPtr by index aftering modding by the buffer size.
+    return (writePtr != readPtr) &&
+           (writePtr % size == readPtr % size);
+}
+
+uint16_t CircularBuffer::getNumAvailBytes() {
     return writePtr - readPtr;
 }
 
-uint8_t CircularBuffer::write(uint8_t byte) {
-    buf[writePtr % size] = byte;
-    this->writePtr++;
-    return 1;
+bool CircularBuffer::write(uint8_t byte) {
+    bool success = true;
+
+    if (isFull()) {
+        success = false;
+    } else {
+        buf[writePtr % size] = byte;
+        writePtr++;
+    }
+
+    return success;
 }
