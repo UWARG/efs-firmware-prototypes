@@ -30,7 +30,7 @@ bool UARTDevice::matchUART(UART_HandleTypeDef* huart) {
 }
 
 void UARTDevice::transmit(uint8_t* buf, uint16_t size) {
-    HAL_UART_Transmit_DMA(uart_handle, buf, size);
+    HAL_UART_Transmit(uart_handle, buf, size, TRANSMIT_TIMEOUT);
 }
 
 uint16_t UARTDevice::getAvailDataSize() {

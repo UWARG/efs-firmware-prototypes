@@ -75,6 +75,7 @@ class UARTDevice {
         bool read(uint8_t* buf, uint16_t size);
 
     private:
+        static const uint16_t TRANSMIT_TIMEOUT = 1000;
         UART_HandleTypeDef* uart_handle;
         uint8_t buf[BUFFER_SIZE];
         CircularBuffer circular_buf;

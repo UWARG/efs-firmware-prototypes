@@ -19,19 +19,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "usart.h"
 #include "rtc.h"
 #include "ucpd.h"
 #include "usb.h"
 #include "gpio.h"
-#include "dma.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "LOS_D_UART.hpp"
-#include <cstring>
-#include <stdio.h>
-#include <stdarg.h> //for va_list var arg functions
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,83 +48,18 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-UARTDevice* p_uart_dev1;
-UARTDevice* p_uart_dev2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void myprintf(const char *fmt, ...);
-void ping_pong_test();
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void myprintf(const char *fmt, ...)
-{
-	static char buffer[256];
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buffer, sizeof(buffer), fmt, args);
-	va_end(args);
 
-	int len = strlen(buffer);
-	HAL_UART_Transmit(&hlpuart1, (uint8_t*)buffer, len, -1);
-}
-
-void ping_pong_test()
-{
-	const uint16_t buf_size = UARTDevice::BUFFER_SIZE;
-	uint8_t buf[buf_size];
-	uint16_t data_size = 0;
-
-	const uint8_t max_test_iterations = 5;
-
-	const char* ping_msg = "Ping";
-	const char* pong_msg = "Pong";
-
-	for (uint8_t test_iterations = 0; test_iterations < max_test_iterations; test_iterations++) {
-		myprintf("Test Iteration #%d\r\n", test_iterations + 1);
-
-		// Send ping
-		p_uart_dev1->transmit((uint8_t*)ping_msg, strlen(ping_msg));
-		myprintf("UART Device 1: ping sent.\r\n");
-
-		// Receive ping
-		data_size = 0;
-		while (data_size == 0) {
-			data_size = p_uart_dev2->getAvailDataSize();
-			HAL_Delay(10);
-		}
-
-		memset(buf, 0, buf_size);
-		p_uart_dev2->read(buf, data_size);
-		if (strcmp((char*)buf, ping_msg) == 0) {
-			myprintf("UART Device 2: ping received.\r\n");
-		} else {
-			myprintf("UART Device 2: invalid message received.\r\n");
-			break;
-		}
-
-		// Send pong
-		p_uart_dev2->transmit((uint8_t*)pong_msg, strlen(pong_msg));
-		myprintf("UART Device 2: pong sent.\r\n");
-
-		// Receive pong
-		data_size = 0;
-		while (data_size == 0) {
-			data_size = p_uart_dev1->getAvailDataSize();
-			HAL_Delay(10);
-		}
-
-		memset(buf, 0, buf_size);
-		p_uart_dev1->read(buf, data_size);
-		if (strcmp((char*)buf, pong_msg) == 0) {
-			myprintf("UART Device 1: pong received.\r\n");
-		}
-	}
-}
 /* USER CODE END 0 */
 
 /**
@@ -137,10 +69,7 @@ void ping_pong_test()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	UARTDevice uart_dev1(&huart2);
-	UARTDevice uart_dev2(&huart3);
-	p_uart_dev1 = &uart_dev1;
-	p_uart_dev2 = &uart_dev2;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -170,14 +99,6 @@ int main(void)
   MX_ADC1_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
-  // Run test
-  myprintf("Test Start\r\n");
-  p_uart_dev1->init();
-  p_uart_dev2->init();
-  HAL_Delay(1000);
-  ping_pong_test();
-  myprintf("Test End\r\n");
 
   /* USER CODE END 2 */
 
@@ -251,59 +172,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size){
-    if (p_uart_dev1->matchUART(huart)) {
-    	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_SET); //turn on green light
 
-    	p_uart_dev1->callback(size);
-
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_RESET); //turn off green light
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_RESET); //turn off red light
-    }
-
-    if (p_uart_dev2->matchUART(huart)) {
-    	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_SET); //turn on green light
-
-    	p_uart_dev2->callback(size);
-
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_RESET); //turn off green light
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_RESET); //turn off red light
-    }
-}
-
- void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
- {
-    if(p_uart_dev1->matchUART(huart)){
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7,GPIO_PIN_SET); //turn on blue light
-        /*
-            should never enter this callback
-        */
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7,GPIO_PIN_RESET); //turn off blue light
-    }
-
-    if(p_uart_dev2->matchUART(huart)){
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7,GPIO_PIN_SET); //turn on blue light
-        /*
-            should never enter this callback
-        */
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7,GPIO_PIN_RESET); //turn off blue light
-    }
- }
-
- void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
- {
-    if(p_uart_dev1->matchUART(huart)){
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_SET); //turn on red light
-        HAL_UART_DMAStop(huart);
-        p_uart_dev1->callback(UARTDevice::BUFFER_SIZE);
-    }
-
-    if(p_uart_dev2->matchUART(huart)){
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_SET); //turn on red light
-        HAL_UART_DMAStop(huart);
-        p_uart_dev2->callback(UARTDevice::BUFFER_SIZE);
-    }
- }
 /* USER CODE END 4 */
 
 /**
